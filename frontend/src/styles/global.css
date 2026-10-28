@@ -1,5 +1,6 @@
 :root {
   font-family: Arial, sans-serif;
+  --color-input: #7e8189;
 
   /* Основные цвета */
   --color-primary: #2455ff;
@@ -16,6 +17,8 @@
 
   /* Границы */
   --color-border: #2455ff;
+
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 * {
