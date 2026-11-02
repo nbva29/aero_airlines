@@ -19,6 +19,8 @@
   --color-border: #2455ff;
 
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  --color-error: #dc2626;
 }
 
 * {

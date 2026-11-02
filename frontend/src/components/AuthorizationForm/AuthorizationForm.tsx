@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { login } from "../../api/auth";
+
 import styles from "./AuthorizationForm.module.css";
 import registerStyles from "../RegisterForm/RegisterForm.module.css";
 
@@ -9,12 +11,16 @@ import showPasswordIcon from "../../assets/show_password.svg";
 import hidePasswordIcon from "../../assets/hide_password.svg";
 
 export default function AuthorizationForm() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = event.target;
@@ -25,8 +31,29 @@ export default function AuthorizationForm() {
     }));
   }
 
-  function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (loading) return;
+
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await login(form);
+
+      if (!response.accessToken) {
+        throw new Error("Сервер не вернул токен авторизации");
+      }
+
+      navigate("/home");
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Не удалось выполнить вход",
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -45,6 +72,8 @@ export default function AuthorizationForm() {
               placeholder="Введите почту"
               value={form.email}
               onChange={handleChange}
+              autoComplete="email"
+              required
             />
           </div>
         </div>
@@ -62,16 +91,18 @@ export default function AuthorizationForm() {
               placeholder="Введите пароль"
               value={form.password}
               onChange={handleChange}
+              autoComplete="current-password"
+              required
             />
 
             <button
               type="button"
               className={registerStyles.eyeButton}
-              onClick={() => setShowPassword(!showPassword)}
+              onClick={() => setShowPassword((prev) => !prev)}
               aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
             >
               <img
-                src={showPassword ? hidePasswordIcon : showPasswordIcon}
+                src={showPassword ? showPasswordIcon : hidePasswordIcon}
                 alt=""
               />
             </button>
@@ -83,11 +114,18 @@ export default function AuthorizationForm() {
         <Link to="/forgot-password">Забыли пароль?</Link>
       </p>
 
+      {error && (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      )}
+
       <button
         type="submit"
         className={`${registerStyles.submitButton} ${styles.submitButton}`}
+        disabled={loading}
       >
-        Войти
+        {loading ? "Выполняется вход..." : "Войти"}
       </button>
     </form>
   );

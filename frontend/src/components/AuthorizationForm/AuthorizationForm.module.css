@@ -32,3 +32,8 @@
 .submitButton {
   margin-top: 20px;
 }
+
+.submitButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
